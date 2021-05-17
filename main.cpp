@@ -4,23 +4,77 @@ using namespace std;
 
 
 // Global Vars
-int noResources, noProcesses;
+int noResources, noProcesses, algType, reqProcess;
 vector<int> avResources;
 vector<vector<int>> aloRes;
 vector<vector<int>> maxRes;
 vector<vector<int>> need;
 vector<int> finish;
 vector<int> safeState;
+vector<int> reqAlg;
 
-// -----------------------------------SAFETY ALGORITHM---------------------------------------------------------------
+
+void readAlgType(){
+    int isRight = 1;
+    do
+    {
+        cout << "Enter 1 for Safety algorithm and 2 for request algorithm : ";
+        cin >> algType;
+        if(algType == 2){
+            cout << "Enter requested process number starting from 0 : ";
+            cin >> reqProcess;
+            cout << "Enter requested resources instances separated by spaces : ";
+            int temp;
+            for (int i = 0; i < noResources; i++)
+            {
+                cin >> temp;
+                reqAlg.push_back(temp);
+            }
+            isRight = 0;
+        } else if(algType == 1){ 
+            isRight = 0;
+        } else if(algType != 1){
+            cout << "Please enter 1 or 2.";
+        }    
+    } while (isRight);
+    
+}
+
+
+// -----------------------------------Request ALGORITHM------------------------------------------------------------------
+void clcReq(){
+    int isLess = 1;
+    for (int i = 0; i < noResources; i++)
+    {
+        if(reqAlg[i] > need[reqProcess][i] || reqAlg[i] > avResources[i]){
+            isLess = 0;
+        }
+    }
+    if(isLess == 1){
+        for (int i = 0; i < noResources; i++)
+        {
+            aloRes[reqProcess][i] += reqAlg[i];
+            need[reqProcess][i] -= reqAlg[i];
+            avResources[i] -= reqAlg[i];
+        }
+    }
+    
+}
+
+
+
+// -------------------------------------END REQUEST----------------------------------------------------------------------
+
+
+// -----------------------------------SAFETY ALGORITHM-------------------------------------------------------------------
 // Helper functions
 void readData(){
     cout << "Please enter no of resources : "; 
     cin >> noResources;
+    cout << "Enter available instances of resources separated by spaces : ";
     for (int i = 0; i < noResources; i++)
     {
         int temp;
-        cout << "Enter available instances of resource " << i << " : ";
         cin >> temp;
         avResources.push_back(temp);
     }
@@ -34,16 +88,19 @@ void readData(){
         int temp;
         vector<int> tempAloVec;
         vector<int> tempMaxVec;
+        cout << "Enter allocated instances of process " << i << " separated by spaces : " ; 
         for (int j = 0; j < noResources; j++)
         {
-            cout << "Enter allocated instances of " << j << " for process " << i  << " : ";
             cin >> temp;
-            tempAloVec.push_back(temp);
-
-            cout << "Enter max instances of " << j << " for process " << i  << " : ";
+            tempAloVec.push_back(temp);            
+        }
+        cout << "Enter maximum needed instances of process " << i << " separated by spaces : " ; 
+        for (int j = 0; j < noResources; j++)
+        {
             cin >> temp;
             tempMaxVec.push_back(temp);
         }
+        
         aloRes.push_back(tempAloVec);
         maxRes.push_back(tempMaxVec);
     }
@@ -108,9 +165,14 @@ int isSafe(){
 
 // -----------------------------------END SAFETY ALGORITHM---------------------------------------------------------------
 
+
 int main(){
     readData();
+    readAlgType();
     clcNeed();
+    if(algType == 2){
+        clcReq();
+    }
     clcFinish();
     int safe = isSafe();
     cout << "IS SAFE? " << safe << endl;
@@ -118,5 +180,7 @@ int main(){
     {
         cout << safeState[i] << endl;
     }
+
+
     
 }
