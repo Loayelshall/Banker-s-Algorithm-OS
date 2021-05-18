@@ -42,12 +42,13 @@ void readAlgType(){
 
 
 // -----------------------------------Request ALGORITHM------------------------------------------------------------------
-void clcReq(){
+int clcReq(){
     int isLess = 1;
     for (int i = 0; i < noResources; i++)
     {
         if(reqAlg[i] > need[reqProcess][i] || reqAlg[i] > avResources[i]){
             isLess = 0;
+            return 0;
         }
     }
     if(isLess == 1){
@@ -56,8 +57,11 @@ void clcReq(){
             aloRes[reqProcess][i] += reqAlg[i];
             need[reqProcess][i] -= reqAlg[i];
             avResources[i] -= reqAlg[i];
+            // finish[i] = 1;
+            // safeState.push_back(i);
         }
     }
+    return 1;
     
 }
 
@@ -171,8 +175,13 @@ int main(){
     readAlgType();
     clcNeed();
     if(algType == 2){
-        clcReq();
+        int safeReq  = clcReq();
+        if(safeReq == 0){
+            cout << "Not safe" << endl;
+            return 0;
+        }
     }
+    clcNeed();
     clcFinish();
     int safe = isSafe();
     cout << "IS SAFE? " << safe << endl;
@@ -180,6 +189,18 @@ int main(){
     {
         cout << safeState[i] << endl;
     }
+
+cout << "NEED" << endl;
+    for (int i = 0; i < need.size(); i++)
+    {
+        for (int j = 0; j < need[i].size(); j++)
+        {
+            cout << need[i][j] << " ";
+        }
+        cout << endl;
+        
+    }
+    
 
 
     
