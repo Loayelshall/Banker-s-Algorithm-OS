@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 using namespace std;
 
 
@@ -10,7 +11,7 @@ vector<vector<int>> aloRes;
 vector<vector<int>> maxRes;
 vector<vector<int>> need;
 vector<int> finish;
-vector<int> safeState;
+vector<string> safeState;
 vector<int> reqAlg;
 
 
@@ -57,10 +58,9 @@ int clcReq(){
             aloRes[reqProcess][i] += reqAlg[i];
             need[reqProcess][i] -= reqAlg[i];
             avResources[i] -= reqAlg[i];
-            // finish[i] = 1;
-            // safeState.push_back(i);
         }
     }
+    safeState.push_back(to_string(reqProcess) + "Req");
     return 1;
     
 }
@@ -86,26 +86,29 @@ void readData(){
       
     cout << "Please enter no of processes : "; 
     cin >> noProcesses;
+    cout << "Enter allocation matrix : " << endl;
     for (int i = 0; i < noProcesses; i++)
     {
         finish.push_back(0);
         int temp;
-        vector<int> tempAloVec;
-        vector<int> tempMaxVec;
-        cout << "Enter allocated instances of process " << i << " separated by spaces : " ; 
+        vector<int> tempAloVec;        
         for (int j = 0; j < noResources; j++)
         {
             cin >> temp;
             tempAloVec.push_back(temp);            
         }
-        cout << "Enter maximum needed instances of process " << i << " separated by spaces : " ; 
+        aloRes.push_back(tempAloVec);
+    }
+    cout << "Enter max matrix : " << endl;
+    for (int i = 0; i < noProcesses; i++)
+    {
+        int temp;
+        vector<int> tempMaxVec;
         for (int j = 0; j < noResources; j++)
         {
             cin >> temp;
             tempMaxVec.push_back(temp);
         }
-        
-        aloRes.push_back(tempAloVec);
         maxRes.push_back(tempMaxVec);
     }
        
@@ -134,15 +137,20 @@ void clcFinish(){
         {
             int currentSum = 0;
             int isSmall = 1;
+            int sum = 0;
             for (int x = 0; x < noResources; x++)
             {
+                sum += need[j][x];
                 if(need[j][x] > avResources[x]){
                     isSmall = 0;
                 }
             }
+            if(sum == 0){
+                finish[j] = 1;
+            }
             if(isSmall == 1 && finish[j] == 0){
                 finish[j] = 1;
-                safeState.push_back(j);
+                safeState.push_back(to_string(j));
                 for (int x = 0; x < noResources; x++)
                 {
                     avResources[x] += aloRes[j][x];
@@ -174,26 +182,39 @@ int main(){
     readData();
     readAlgType();
     clcNeed();
+    int safeReq;
     if(algType == 2){
-        int safeReq  = clcReq();
+        safeReq  = clcReq();
         if(safeReq == 0){
-            cout << "Not safe" << endl;
+            cout << "Request Not Granted" << endl;
             return 0;
-        }
+        } 
     }
     clcNeed();
     clcFinish();
     int safe = isSafe();
-    cout << "IS SAFE? " << safe << endl;
-    for (int i = 0; i < safeState.size(); i++)
-    {
-        cout << safeState[i] << endl;
+    cout << endl;
+    if(safe == 1){
+        cout << "Yes ,Safe state <";
+        for (int i = 0; i < safeState.size(); i++)
+        {
+            if(i == safeState.size()-1){
+                cout << 'P' << safeState[i];    
+            } else {
+                cout << 'P' << safeState[i] << ',';
+            }
+            
+        }
+        cout << ">" << endl << endl;
+    } else {
+        cout << "No safe state" << endl << endl;
     }
-
-cout << "NEED" << endl;
-    for (int i = 0; i < need.size(); i++)
+    
+    
+    cout << "Need Matrix :" << endl;
+    for (int i = 0; i < noProcesses; i++)
     {
-        for (int j = 0; j < need[i].size(); j++)
+        for (int j = 0; j < noResources; j++)
         {
             cout << need[i][j] << " ";
         }
